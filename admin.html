@@ -1,1 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comfort Sofas - Admin</title>
 
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f5f1eb;
+color:#29211b
+}
+header{
+background:#211a15;
+color:white;
+padding:20px;
+text-align:center
+}
+.container{
+max-width:900px;
+margin:30px auto;
+padding:20px
+}
+.panel{
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 8px 25px #0001
+}
+h2{margin-top:0}
+input,textarea,select{
+width:100%;
+padding:13px;
+margin:7px 0 14px;
+border:1px solid #ddd;
+border-radius:9px;
+font-size:15px
+}
+textarea{min-height:100px}
+button{
+border:0;
+padding:13px 18px;
+border-radius:9px;
+font-weight:bold;
+cursor:pointer;
+margin:4px
+}
+.save{background:#159447;color:white}
+.clear{background:#ddd}
+.delete{background:#c0392b;color:white}
+.product{
+border:1px solid #ddd;
+border-radius:12px;
+padding:15px;
+margin-top:12px
+}
+.product h3{margin:0 0 5px}
+.price{color:#9b693c;font-weight:bold}
+#login{
+max-width:400px;
+margin:80px auto
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🛋️ Comfort Sofas</h1>
+<p>Admin Panel</p>
+</header>
+
+<div class="container">
+
+<div class="panel" id="login">
+
+<h2>Admin Login</h2>
+
+<input
+type="password"
+id="password"
+placeholder="Admin Password"
+>
+
+<button class="save" onclick="login()">
+Login
+</button>
+
+<p id="loginMsg"></p>
+
+</div>
+
+
+<div class="panel" id="dashboard" style="display:none">
+
+<h2>➕ Add / Edit Sofa</h2>
+
+<input id="name" placeholder="Sofa Name">
+
+<input id="price" placeholder="Price">
+
+<input id="image" placeholder="Image URL">
+
+<input id="material" placeholder="Material">
+
+<input id="foam" placeholder="Foam">
+
+<input id="frame" placeholder="Wood / Frame">
+
+<input id="colour" placeholder="Colour">
+
+<input id="size" placeholder="Size">
+
+<textarea
+id="description"
+placeholder="Sofa Description">
+</textarea>
+
+<button class="save" onclick="saveProduct()">
+💾 Save Sofa
+</button>
+
+<button class="clear" onclick="clearForm()">
+Clear
+</button>
+
+<hr>
+
+<h2>📦 Your Sofas</h2>
+
+<div id="products"></div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const ADMIN_PASSWORD="jinwoo";
+
+let products=
+JSON.parse(localStorage.getItem("comfortSofas")) || [];
+
+let editIndex=-1;
+
+
+function login(){
+
+let pass=document.getElementById("password").value;
+
+if(pass===ADMIN_PASSWORD){
+
+document.getElementById("login").style.display="none";
+
+document.getElementById("dashboard").style.display="block";
+
+showProducts();
+
+}else{
+
+document.getElementById("loginMsg").innerText=
+"❌ Wrong password";
+
+}
+
+}
+
+
+function saveProduct(){
+
+let product={
+
+name:document.getElementById("name").value,
+
+price:document.getElementById("price").value,
+
+image:document.getElementById("image").value,
+
+material:document.getElementById("material").value,
+
+foam:document.getElementById("foam").value,
+
+frame:document.getElementById("frame").value,
+
+colour:document.getElementById("colour").value,
+
+size:document.getElementById("size").value,
+
+description:document.getElementById("description").value
+
+};
+
+
+if(!product.name){
+
+alert("Sofa name likho");
+
+return;
+
+}
+
+
+if(editIndex===-1){
+
+products.push(product);
+
+}else{
+
+products[editIndex]=product;
+
+editIndex=-1;
+
+}
+
+
+localStorage.setItem(
+"comfortSofas",
+JSON.stringify(products)
+);
+
+clearForm();
+
+showProducts();
+
+alert("✅ Sofa saved!");
+
+}
+
+
+function showProducts(){
+
+let box=document.getElementById("products");
+
+box.innerHTML="";
+
+
+if(products.length===0){
+
+box.innerHTML="<p>No sofas added yet.</p>";
+
+return;
+
+}
+
+
+products.forEach((p,i)=>{
+
+box.innerHTML+=`
+
+<div class="product">
+
+<h3>${p.name}</h3>
+
+<div class="price">
+₹ ${p.price || "Price on enquiry"}
+</div>
+
+<p>
+<b>Material:</b> ${p.material || "-"}<br>
+<b>Foam:</b> ${p.foam || "-"}<br>
+<b>Frame:</b> ${p.frame || "-"}<br>
+<b>Colour:</b> ${p.colour || "-"}<br>
+<b>Size:</b> ${p.size || "-"}
+</p>
+
+<button
+class="save"
+onclick="editProduct(${i})">
+✏️ Edit
+</button>
+
+<button
+class="delete"
+onclick="deleteProduct(${i})">
+🗑️ Delete
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+function editProduct(i){
+
+let p=products[i];
+
+editIndex=i;
+
+document.getElementById("name").value=p.name;
+document.getElementById("price").value=p.price;
+document.getElementById("image").value=p.image;
+document.getElementById("material").value=p.material;
+document.getElementById("foam").value=p.foam;
+document.getElementById("frame").value=p.frame;
+document.getElementById("colour").value=p.colour;
+document.getElementById("size").value=p.size;
+document.getElementById("description").value=p.description;
+
+window.scrollTo(0,0);
+
+}
+
+
+function deleteProduct(i){
+
+if(confirm("Is sofa ko delete karna hai?")){
+
+products.splice(i,1);
+
+localStorage.setItem(
+"comfortSofas",
+JSON.stringify(products)
+);
+
+showProducts();
+
+}
+
+}
+
+
+function clearForm(){
+
+document.querySelectorAll(
+"#dashboard input,#dashboard textarea"
+).forEach(x=>x.value="");
+
+editIndex=-1;
+
+}
+
+</script>
+
+</body>
+</html>
